@@ -554,11 +554,19 @@ void LivoxPointsPlugin::PublishLivoxROSDriverCustomMsg(std::vector<std::pair<int
 
     msg.header.frame_id = frameName;
 
+    /*
+    // comment this part as said by GPT
     struct timespec tn; 
     clock_gettime(CLOCK_REALTIME, &tn);
 
     msg.timebase = tn.tv_nsec;
     msg.header.stamp = ros::Time::now();
+    */
+    // the following 2 lines are required by gpt to find bug in this plugin
+    msg.header.stamp = ros::Time::now();
+    msg.timebase = msg.header.stamp.toNSec();
+
+
     ros::Time timestamp = ros::Time::now();
     for (int i = 0; i < points_pair.size(); ++i) {
         std::pair<int, AviaRotateInfo> &pair = points_pair[i];
@@ -594,7 +602,7 @@ void LivoxPointsPlugin::PublishLivoxROSDriverCustomMsg(std::vector<std::pair<int
             // ROS_INFO_STREAM("offset_time: " << pt.offset_time );
             pt.tag = 0x10;
             pt.reflectivity = 100;
-            pt.offset_time = (1e9/200000*i);
+            pt.offset_time = 0;//(1e9/200000*i);
             msg.points.push_back(pt);
         }
     }
